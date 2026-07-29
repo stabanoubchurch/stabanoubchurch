@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EmbedServicesRouteImport } from './routes/embed/services'
 import { Route as EmbedPriestsRouteImport } from './routes/embed/priests'
+import { Route as EmbedCalendarRouteImport } from './routes/embed/calendar'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,33 +29,47 @@ const EmbedPriestsRoute = EmbedPriestsRouteImport.update({
   path: '/embed/priests',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EmbedCalendarRoute = EmbedCalendarRouteImport.update({
+  id: '/embed/calendar',
+  path: '/embed/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/embed/calendar': typeof EmbedCalendarRoute
   '/embed/priests': typeof EmbedPriestsRoute
   '/embed/services': typeof EmbedServicesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/embed/calendar': typeof EmbedCalendarRoute
   '/embed/priests': typeof EmbedPriestsRoute
   '/embed/services': typeof EmbedServicesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/embed/calendar': typeof EmbedCalendarRoute
   '/embed/priests': typeof EmbedPriestsRoute
   '/embed/services': typeof EmbedServicesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/embed/priests' | '/embed/services'
+  fullPaths: '/' | '/embed/calendar' | '/embed/priests' | '/embed/services'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/embed/priests' | '/embed/services'
-  id: '__root__' | '/' | '/embed/priests' | '/embed/services'
+  to: '/' | '/embed/calendar' | '/embed/priests' | '/embed/services'
+  id:
+    | '__root__'
+    | '/'
+    | '/embed/calendar'
+    | '/embed/priests'
+    | '/embed/services'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  EmbedCalendarRoute: typeof EmbedCalendarRoute
   EmbedPriestsRoute: typeof EmbedPriestsRoute
   EmbedServicesRoute: typeof EmbedServicesRoute
 }
@@ -82,11 +97,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmbedPriestsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/embed/calendar': {
+      id: '/embed/calendar'
+      path: '/embed/calendar'
+      fullPath: '/embed/calendar'
+      preLoaderRoute: typeof EmbedCalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  EmbedCalendarRoute: EmbedCalendarRoute,
   EmbedPriestsRoute: EmbedPriestsRoute,
   EmbedServicesRoute: EmbedServicesRoute,
 }
