@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EmbedSpotlightRouteImport } from './routes/embed/spotlight'
 import { Route as EmbedServicesRouteImport } from './routes/embed/services'
 import { Route as EmbedPriestsRouteImport } from './routes/embed/priests'
 import { Route as EmbedCalendarRouteImport } from './routes/embed/calendar'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -43,6 +49,7 @@ const EmbedCalendarRoute = EmbedCalendarRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/embed/calendar': typeof EmbedCalendarRoute
   '/embed/priests': typeof EmbedPriestsRoute
   '/embed/services': typeof EmbedServicesRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/embed/calendar': typeof EmbedCalendarRoute
   '/embed/priests': typeof EmbedPriestsRoute
   '/embed/services': typeof EmbedServicesRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/embed/calendar': typeof EmbedCalendarRoute
   '/embed/priests': typeof EmbedPriestsRoute
   '/embed/services': typeof EmbedServicesRoute
@@ -67,6 +76,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/embed/calendar'
     | '/embed/priests'
     | '/embed/services'
@@ -74,6 +84,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/embed/calendar'
     | '/embed/priests'
     | '/embed/services'
@@ -81,6 +92,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/auth'
     | '/embed/calendar'
     | '/embed/priests'
     | '/embed/services'
@@ -89,6 +101,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
   EmbedCalendarRoute: typeof EmbedCalendarRoute
   EmbedPriestsRoute: typeof EmbedPriestsRoute
   EmbedServicesRoute: typeof EmbedServicesRoute
@@ -97,6 +110,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -137,6 +157,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
   EmbedCalendarRoute: EmbedCalendarRoute,
   EmbedPriestsRoute: EmbedPriestsRoute,
   EmbedServicesRoute: EmbedServicesRoute,
