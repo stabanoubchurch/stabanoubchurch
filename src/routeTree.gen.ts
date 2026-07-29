@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EmbedServicesRouteImport } from './routes/embed/services'
 import { Route as EmbedPriestsRouteImport } from './routes/embed/priests'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmbedServicesRoute = EmbedServicesRouteImport.update({
+  id: '/embed/services',
+  path: '/embed/services',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmbedPriestsRoute = EmbedPriestsRouteImport.update({
@@ -26,27 +32,31 @@ const EmbedPriestsRoute = EmbedPriestsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/embed/priests': typeof EmbedPriestsRoute
+  '/embed/services': typeof EmbedServicesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/embed/priests': typeof EmbedPriestsRoute
+  '/embed/services': typeof EmbedServicesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/embed/priests': typeof EmbedPriestsRoute
+  '/embed/services': typeof EmbedServicesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/embed/priests'
+  fullPaths: '/' | '/embed/priests' | '/embed/services'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/embed/priests'
-  id: '__root__' | '/' | '/embed/priests'
+  to: '/' | '/embed/priests' | '/embed/services'
+  id: '__root__' | '/' | '/embed/priests' | '/embed/services'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   EmbedPriestsRoute: typeof EmbedPriestsRoute
+  EmbedServicesRoute: typeof EmbedServicesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/embed/services': {
+      id: '/embed/services'
+      path: '/embed/services'
+      fullPath: '/embed/services'
+      preLoaderRoute: typeof EmbedServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/embed/priests': {
@@ -71,6 +88,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   EmbedPriestsRoute: EmbedPriestsRoute,
+  EmbedServicesRoute: EmbedServicesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
