@@ -60,12 +60,30 @@ export function ServicesPanel() {
 
   const [draft, setDraft] = useState<ServiceRow | null>(null);
   const [timeDraft, setTimeDraft] = useState<TimeRow | null>(null);
+  const [firstTime, setFirstTime] = useState<TimeRow>(blankTime(""));
+
+  const openNewService = () => {
+    setFirstTime(blankTime(""));
+    setDraft(blankService());
+  };
 
   const submitService = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!draft) return;
     const { id, ...rest } = draft;
-    await saveService.mutateAsync(id ? { id, ...rest } : rest);
+    const saved = await saveService.mutateAsync(id ? { id, ...rest } : rest);
+    if (!id) {
+      const newId = (saved as { id?: string } | undefined)?.id;
+      if (newId && firstTime.start_time) {
+        const { id: _ignored, ...timeRest } = firstTime;
+        await saveTime.mutateAsync({
+          ...timeRest,
+          service_id: newId,
+          note: timeRest.note || null,
+          location: timeRest.location || null,
+        });
+      }
+    }
     setDraft(null);
   };
 
@@ -82,7 +100,7 @@ export function ServicesPanel() {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl text-primary">Services</h2>
-        <PrimaryButton onClick={() => setDraft(blankService())}>Add service</PrimaryButton>
+        <PrimaryButton onClick={openNewService}>Add service</PrimaryButton>
       </div>
 
       {draft ? (
@@ -122,6 +140,62 @@ export function ServicesPanel() {
                 Published
               </label>
             </div>
+            {!draft.id ? (
+              <div className="space-y-3 border-t border-border pt-4">
+                <p className="text-sm font-semibold text-primary">First time slot (optional)</p>
+                <div className="flex flex-wrap items-end gap-3">
+                  <Field label="Day">
+                    <select
+                      className={inputClass}
+                      value={firstTime.day_of_week}
+                      onChange={(e) =>
+                        setFirstTime({ ...firstTime, day_of_week: Number(e.target.value) })
+                      }
+                    >
+                      {DAY_NAMES.map((day, index) => (
+                        <option key={day} value={index}>
+                          {day}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="Start time">
+                    <input
+                      type="time"
+                      className={inputClass}
+                      value={firstTime.start_time.slice(0, 5)}
+                      onChange={(e) => setFirstTime({ ...firstTime, start_time: e.target.value })}
+                    />
+                  </Field>
+                  <Field label="Location">
+                    <input
+                      className={inputClass}
+                      placeholder="e.g. Main church"
+                      value={firstTime.location ?? ""}
+                      onChange={(e) => setFirstTime({ ...firstTime, location: e.target.value })}
+                    />
+                  </Field>
+                  <Field label="Note">
+                    <input
+                      className={inputClass}
+                      value={firstTime.note ?? ""}
+                      onChange={(e) => setFirstTime({ ...firstTime, note: e.target.value })}
+                    />
+                  </Field>
+                  <label className="mb-2 flex items-center gap-2 text-sm text-primary">
+                    <input
+                      type="checkbox"
+                      checked={firstTime.recurring}
+                      onChange={(e) => setFirstTime({ ...firstTime, recurring: e.target.checked })}
+                    />
+                    Repeats weekly
+                  </label>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  You can add more times later with “Add time”.
+                </p>
+              </div>
+            ) : null}
             <div className="flex gap-2">
               <PrimaryButton type="submit" disabled={saveService.isPending}>
                 Save service
