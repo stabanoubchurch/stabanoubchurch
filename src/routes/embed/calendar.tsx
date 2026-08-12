@@ -18,12 +18,12 @@ import {
 export const Route = createFileRoute("/embed/calendar")({
   head: () => ({
     meta: [
-      { title: "Parish Calendar" },
+      { title: "Calendar" },
       {
         name: "description",
         content: "Monthly parish calendar — tap any day to see the full timetable of events.",
       },
-      { property: "og:title", content: "Parish Calendar" },
+      { property: "og:title", content: "Calendar" },
       {
         property: "og:description",
         content: "Monthly parish calendar — tap any day to see the full timetable of events.",
@@ -54,7 +54,7 @@ function CalendarEmbed() {
   };
 
   return (
-    <EmbedShell title="Parish Calendar" intro="Select a day to see everything happening.">
+    <EmbedShell title="Calendar" intro="Select a day to see everything happening.">
       <div className="rounded-lg border border-border bg-card p-4 sm:p-6">
         <div className="mb-4 flex items-center justify-between">
           <button
