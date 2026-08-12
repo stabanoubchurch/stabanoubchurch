@@ -13,6 +13,8 @@ type EventRow = {
   start_time: string | null;
   end_time: string | null;
   published: boolean;
+  recurring: boolean;
+  repeat_until: string | null;
 };
 
 const blank = (): EventRow => ({
@@ -24,12 +26,14 @@ const blank = (): EventRow => ({
   start_time: "",
   end_time: "",
   published: true,
+  recurring: false,
+  repeat_until: "",
 });
 
 export function EventsPanel() {
   const { data: events = [], isPending } = useRows<EventRow>(
     "events",
-    "id, title, description, location, event_date, start_time, end_time, published",
+    "id, title, description, location, event_date, start_time, end_time, published, recurring, repeat_until",
     [{ column: "event_date", ascending: false }, { column: "start_time" }],
   );
   const save = useSaveRow("events");
@@ -45,6 +49,7 @@ export function EventsPanel() {
       location: rest.location || null,
       start_time: rest.start_time || null,
       end_time: rest.end_time || null,
+      repeat_until: rest.recurring ? rest.repeat_until || null : null,
     };
     await save.mutateAsync(id ? { id, ...payload } : payload);
     setDraft(null);
@@ -112,6 +117,34 @@ export function EventsPanel() {
                 onChange={(e) => setDraft({ ...draft, description: e.target.value })}
               />
             </Field>
+            <div className="space-y-3 rounded-md border border-border p-3">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setDraft({ ...draft, recurring: false, repeat_until: "" })}
+                  className={`rounded-md border px-3 py-1.5 text-sm transition-colors ${!draft.recurring ? "border-primary bg-primary text-primary-foreground" : "border-border text-primary hover:bg-secondary"}`}
+                >
+                  One-off event
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDraft({ ...draft, recurring: true })}
+                  className={`rounded-md border px-3 py-1.5 text-sm transition-colors ${draft.recurring ? "border-primary bg-primary text-primary-foreground" : "border-border text-primary hover:bg-secondary"}`}
+                >
+                  Repeats weekly
+                </button>
+              </div>
+              {draft.recurring ? (
+                <Field label="Repeat until (optional)">
+                  <input
+                    type="date"
+                    className={inputClass}
+                    value={draft.repeat_until ?? ""}
+                    onChange={(e) => setDraft({ ...draft, repeat_until: e.target.value })}
+                  />
+                </Field>
+              ) : null}
+            </div>
             <label className="flex items-center gap-2 text-sm text-primary">
               <input
                 type="checkbox"
@@ -151,6 +184,7 @@ export function EventsPanel() {
                   </p>
                   <p className="text-sm text-muted-foreground">
                     {formatLongDate(event.event_date)} · {formatTime(event.start_time)}
+                    {event.recurring ? " · repeats weekly" : ""}
                   </p>
                 </div>
                 <div className="flex gap-2">
