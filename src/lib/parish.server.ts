@@ -26,6 +26,8 @@ export type ServiceTime = {
   day_of_week: number;
   start_time: string;
   note: string | null;
+  location: string | null;
+  recurring: boolean;
 };
 
 export type ParishService = {
@@ -126,7 +128,7 @@ export async function loadServices(): Promise<ParishService[]> {
   const { data, error } = await client
     .from("services")
     .select(
-      "id, name, description, sort_order, service_times ( id, day_of_week, start_time, note, sort_order )",
+      "id, name, description, sort_order, service_times ( id, day_of_week, start_time, note, location, recurring, sort_order )",
     )
     .eq("published", true)
     .order("sort_order", { ascending: true });
@@ -146,6 +148,8 @@ export async function loadServices(): Promise<ParishService[]> {
         day_of_week: t.day_of_week,
         start_time: t.start_time,
         note: t.note,
+        location: t.location,
+        recurring: t.recurring,
       })),
   }));
 }
