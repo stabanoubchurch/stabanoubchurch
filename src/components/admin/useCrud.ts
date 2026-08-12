@@ -26,9 +26,15 @@ export function useSaveRow(table: TableName, invalidate: TableName[] = []) {
         const { id, ...rest } = row;
         const { error } = await supabase.from(table).update(rest as never).eq("id", id);
         if (error) throw error;
+        return { id: id as string };
       } else {
-        const { error } = await supabase.from(table).insert(row as never);
+        const { data, error } = await supabase
+          .from(table)
+          .insert(row as never)
+          .select("id")
+          .single();
         if (error) throw error;
+        return { id: (data as { id: string }).id };
       }
     },
     onSuccess: () => keys.forEach((k) => queryClient.invalidateQueries({ queryKey: ["admin", k] })),
