@@ -100,7 +100,9 @@ export type Database = {
           created_at: string
           day_of_week: number
           id: string
+          location: string | null
           note: string | null
+          recurring: boolean
           service_id: string
           sort_order: number
           start_time: string
@@ -109,7 +111,9 @@ export type Database = {
           created_at?: string
           day_of_week?: number
           id?: string
+          location?: string | null
           note?: string | null
+          recurring?: boolean
           service_id: string
           sort_order?: number
           start_time: string
@@ -118,7 +122,9 @@ export type Database = {
           created_at?: string
           day_of_week?: number
           id?: string
+          location?: string | null
           note?: string | null
+          recurring?: boolean
           service_id?: string
           sort_order?: number
           start_time?: string

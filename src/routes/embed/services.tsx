@@ -58,8 +58,16 @@ function ServicesEmbed() {
                     >
                       <span className="font-semibold text-primary">
                         {DAY_NAMES[time.day_of_week] ?? "Weekly"}
+                        {time.recurring ? (
+                          <span className="ml-2 text-xs font-normal text-muted-foreground">
+                            every week
+                          </span>
+                        ) : null}
                       </span>
                       <span className="text-gold font-semibold">{formatTime(time.start_time)}</span>
+                      {time.location ? (
+                        <span className="w-full text-sm text-slate">{time.location}</span>
+                      ) : null}
                       {time.note ? (
                         <span className="w-full text-muted-foreground">{time.note}</span>
                       ) : null}

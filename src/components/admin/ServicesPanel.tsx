@@ -18,6 +18,8 @@ type TimeRow = {
   day_of_week: number;
   start_time: string;
   note: string | null;
+  location: string | null;
+  recurring: boolean;
   sort_order: number;
 };
 
@@ -35,6 +37,8 @@ const blankTime = (serviceId: string): TimeRow => ({
   day_of_week: 0,
   start_time: "09:00",
   note: "",
+  location: "",
+  recurring: true,
   sort_order: 0,
 });
 
@@ -46,7 +50,7 @@ export function ServicesPanel() {
   );
   const { data: times = [] } = useRows<TimeRow>(
     "service_times",
-    "id, service_id, day_of_week, start_time, note, sort_order",
+    "id, service_id, day_of_week, start_time, note, location, recurring, sort_order",
     [{ column: "day_of_week" }, { column: "start_time" }],
   );
   const saveService = useSaveRow("services");
@@ -69,7 +73,7 @@ export function ServicesPanel() {
     event.preventDefault();
     if (!timeDraft) return;
     const { id, ...rest } = timeDraft;
-    const payload = { ...rest, note: rest.note || null };
+    const payload = { ...rest, note: rest.note || null, location: rest.location || null };
     await saveTime.mutateAsync(id ? { id, ...payload } : payload);
     setTimeDraft(null);
   };
@@ -165,6 +169,22 @@ export function ServicesPanel() {
                 onChange={(e) => setTimeDraft({ ...timeDraft, note: e.target.value })}
               />
             </Field>
+            <Field label="Location">
+              <input
+                className={inputClass}
+                placeholder="e.g. Main church"
+                value={timeDraft.location ?? ""}
+                onChange={(e) => setTimeDraft({ ...timeDraft, location: e.target.value })}
+              />
+            </Field>
+            <label className="mb-2 flex items-center gap-2 text-sm text-primary">
+              <input
+                type="checkbox"
+                checked={timeDraft.recurring}
+                onChange={(e) => setTimeDraft({ ...timeDraft, recurring: e.target.checked })}
+              />
+              Repeats weekly
+            </label>
             <PrimaryButton type="submit" disabled={saveTime.isPending}>
               Save time
             </PrimaryButton>
@@ -215,7 +235,9 @@ export function ServicesPanel() {
                     <li key={time.id} className="flex items-center justify-between gap-3">
                       <span className="text-slate">
                         {DAY_NAMES[time.day_of_week]} · {formatTime(time.start_time)}
+                        {time.location ? ` · ${time.location}` : ""}
                         {time.note ? ` · ${time.note}` : ""}
+                        {time.recurring ? " · weekly" : " · one-off"}
                       </span>
                       <span className="flex gap-2">
                         <button
