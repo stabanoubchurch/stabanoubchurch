@@ -113,14 +113,36 @@ export async function loadEvents(month: string): Promise<ParishEvent[]> {
   const client = publicClient();
   const { data, error } = await client
     .from("events")
-    .select("id, title, description, location, event_date, start_time, end_time")
+    .select("id, title, description, location, event_date, start_time, end_time, recurring, repeat_until")
     .eq("published", true)
-    .gte("event_date", start)
     .lt("event_date", end)
     .order("event_date", { ascending: true })
     .order("start_time", { ascending: true, nullsFirst: true });
   if (error) throw error;
-  return data ?? [];
+  const rows = data ?? [];
+  const out: ParishEvent[] = [];
+  for (const row of rows) {
+    const { recurring, repeat_until, ...base } = row;
+    if (!recurring) {
+      if (row.event_date >= start) out.push(base);
+      continue;
+    }
+    // Weekly repeat: same weekday, from the original date until repeat_until (if set).
+    const first = new Date(`${row.event_date}T00:00:00Z`);
+    let cursor = new Date(first);
+    while (cursor < startDate) cursor = new Date(cursor.getTime() + 7 * 86400000);
+    while (cursor < endDate) {
+      const key = cursor.toISOString().slice(0, 10);
+      if (repeat_until && key > repeat_until) break;
+      out.push({ ...base, id: `${base.id}@${key}`, event_date: key });
+      cursor = new Date(cursor.getTime() + 7 * 86400000);
+    }
+  }
+  return out.sort((a, b) =>
+    a.event_date === b.event_date
+      ? (a.start_time ?? "").localeCompare(b.start_time ?? "")
+      : a.event_date.localeCompare(b.event_date),
+  );
 }
 
 export async function loadServices(): Promise<ParishService[]> {
