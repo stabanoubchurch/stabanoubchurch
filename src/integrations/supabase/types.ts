@@ -23,6 +23,8 @@ export type Database = {
           id: string
           location: string | null
           published: boolean
+          recurring: boolean
+          repeat_until: string | null
           start_time: string | null
           title: string
           updated_at: string
@@ -35,6 +37,8 @@ export type Database = {
           id?: string
           location?: string | null
           published?: boolean
+          recurring?: boolean
+          repeat_until?: string | null
           start_time?: string | null
           title: string
           updated_at?: string
@@ -47,6 +51,8 @@ export type Database = {
           id?: string
           location?: string | null
           published?: boolean
+          recurring?: boolean
+          repeat_until?: string | null
           start_time?: string | null
           title?: string
           updated_at?: string
