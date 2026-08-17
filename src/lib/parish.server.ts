@@ -19,6 +19,7 @@ export type ParishEvent = {
   event_date: string;
   start_time: string | null;
   end_time: string | null;
+  category: string;
 };
 
 export type ServiceTime = {
@@ -113,7 +114,9 @@ export async function loadEvents(month: string): Promise<ParishEvent[]> {
   const client = publicClient();
   const { data, error } = await client
     .from("events")
-    .select("id, title, description, location, event_date, start_time, end_time, recurring, repeat_until")
+    .select(
+      "id, title, description, location, event_date, start_time, end_time, category, recurring, repeat_until",
+    )
     .eq("published", true)
     .lt("event_date", end)
     .order("event_date", { ascending: true })
