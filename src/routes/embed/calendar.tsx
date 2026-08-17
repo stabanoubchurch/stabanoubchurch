@@ -95,10 +95,9 @@ function CalendarEmbed() {
             const count = dayEvents.length;
             const dots = [...new Set(dayEvents.map((e) => categoryMeta(e.category).color))].slice(
               0,
-              3,
+              4,
             );
-            const isSelected = key === selected;
-            const isToday = key === dateKey(today);
+            const firstColor = dots[0];
             return (
               <button
                 key={key}
@@ -114,14 +113,18 @@ function CalendarEmbed() {
                   inMonth ? "text-foreground" : "text-muted-foreground/50",
                   isToday && !isSelected ? "border-gold" : "",
                 ].join(" ")}
+                style={!isSelected && firstColor ? { backgroundColor: `${firstColor}15` } : undefined}
               >
                 <span className={isSelected ? "font-semibold" : ""}>{day.getDate()}</span>
-                <span className="mt-1 flex h-1.5 gap-0.5">
+                <span className="mt-1.5 flex h-2 gap-1">
                   {dots.map((color, i) => (
                     <span
                       key={i}
-                      className="h-1.5 w-1.5 rounded-full"
-                      style={{ backgroundColor: isSelected ? "var(--primary-foreground)" : color }}
+                      className="h-2 w-2 rounded-full ring-1 ring-black/10"
+                      style={{
+                        backgroundColor: isSelected ? "var(--primary-foreground)" : color,
+                      }}
+                      aria-hidden
                     />
                   ))}
                 </span>
