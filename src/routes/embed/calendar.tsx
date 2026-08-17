@@ -137,9 +137,9 @@ function CalendarEmbed() {
 
         <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-border pt-4 text-xs text-muted-foreground">
           {EVENT_CATEGORIES.map((cat) => (
-            <li key={cat.value} className="flex items-center gap-1.5">
+            <li key={cat.value} className="flex items-center gap-2 rounded-md bg-white/50 px-2 py-1">
               <span
-                className="h-2.5 w-2.5 rounded-full"
+                className="h-3 w-3 rounded-full ring-1 ring-black/10"
                 style={{ backgroundColor: cat.color }}
                 aria-hidden
               />
