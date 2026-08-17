@@ -115,14 +115,14 @@ function CalendarEmbed() {
                   inMonth ? "text-foreground" : "text-muted-foreground/50",
                   isToday && !isSelected ? "border-gold" : "",
                 ].join(" ")}
-                style={!isSelected && firstColor ? { backgroundColor: `${firstColor}15` } : undefined}
+                style={!isSelected && firstColor ? { backgroundColor: `${firstColor}22` } : undefined}
               >
                 <span className={isSelected ? "font-semibold" : ""}>{day.getDate()}</span>
-                <span className="mt-1.5 flex h-2 gap-1">
+                <span className="mt-1.5 flex h-3 gap-1.5">
                   {dots.map((color, i) => (
                     <span
                       key={i}
-                      className="h-2 w-2 rounded-full ring-1 ring-black/10"
+                      className="h-3 w-3 rounded-full ring-1 ring-black/10"
                       style={{
                         backgroundColor: isSelected ? "var(--primary-foreground)" : color,
                       }}
