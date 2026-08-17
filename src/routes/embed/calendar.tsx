@@ -118,11 +118,11 @@ function CalendarEmbed() {
                 style={!isSelected && firstColor ? { backgroundColor: `${firstColor}22` } : undefined}
               >
                 <span className={isSelected ? "font-semibold" : ""}>{day.getDate()}</span>
-                <span className="mt-1.5 flex h-2.5 gap-1.5">
+                <span className="mt-1.5 flex h-2 gap-1.5">
                   {dots.map((color, i) => (
                     <span
                       key={i}
-                      className="h-2.5 w-2.5 rounded-full ring-1 ring-black/10"
+                      className="h-2 w-2 rounded-full ring-1 ring-black/10"
                       style={{
                         backgroundColor: isSelected ? "var(--primary-foreground)" : color,
                       }}
