@@ -174,9 +174,9 @@ function CalendarEmbed() {
                 <div className="min-w-0">
                   <p className="font-semibold text-primary">{event.title}</p>
                   <span
-                    className="mt-1 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide"
+                    className="mt-1.5 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide"
                     style={{
-                      backgroundColor: `${categoryMeta(event.category).color}20`,
+                      backgroundColor: `${categoryMeta(event.category).color}25`,
                       color: categoryMeta(event.category).color,
                     }}
                   >
