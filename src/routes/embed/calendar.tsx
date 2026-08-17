@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 
 import { EmbedShell } from "@/components/embed/EmbedShell";
 import { getEvents } from "@/lib/parish.functions";
+import { EVENT_CATEGORIES, categoryMeta } from "@/lib/event-categories";
 import {
   DAY_NAMES,
   MONTH_NAMES,
@@ -90,7 +91,12 @@ function CalendarEmbed() {
           {grid.map((day) => {
             const key = dateKey(day);
             const inMonth = day.getMonth() === cursor.getMonth();
-            const count = events.filter((event) => event.event_date === key).length;
+            const dayEvents = events.filter((event) => event.event_date === key);
+            const count = dayEvents.length;
+            const dots = [...new Set(dayEvents.map((e) => categoryMeta(e.category).color))].slice(
+              0,
+              3,
+            );
             const isSelected = key === selected;
             const isToday = key === dateKey(today);
             return (
@@ -111,10 +117,11 @@ function CalendarEmbed() {
               >
                 <span className={isSelected ? "font-semibold" : ""}>{day.getDate()}</span>
                 <span className="mt-1 flex h-1.5 gap-0.5">
-                  {Array.from({ length: Math.min(count, 3) }).map((_, i) => (
+                  {dots.map((color, i) => (
                     <span
                       key={i}
-                      className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-primary-foreground" : "bg-gold"}`}
+                      className="h-1.5 w-1.5 rounded-full"
+                      style={{ backgroundColor: isSelected ? "var(--primary-foreground)" : color }}
                     />
                   ))}
                 </span>
@@ -122,6 +129,19 @@ function CalendarEmbed() {
             );
           })}
         </div>
+
+        <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-border pt-4 text-xs text-muted-foreground">
+          {EVENT_CATEGORIES.map((cat) => (
+            <li key={cat.value} className="flex items-center gap-1.5">
+              <span
+                className="h-2.5 w-2.5 rounded-full"
+                style={{ backgroundColor: cat.color }}
+                aria-hidden
+              />
+              {cat.label}
+            </li>
+          ))}
+        </ul>
       </div>
 
       <section className="mt-6 rounded-lg border border-border bg-card p-6">
@@ -133,7 +153,11 @@ function CalendarEmbed() {
         ) : (
           <ol className="mt-4 divide-y divide-border border-t border-border">
             {selectedEvents.map((event) => (
-              <li key={event.id} className="flex gap-4 py-4">
+              <li
+                key={event.id}
+                className="flex gap-4 border-l-4 py-4 pl-3"
+                style={{ borderLeftColor: categoryMeta(event.category).color }}
+              >
                 <div className="w-24 shrink-0 text-sm font-semibold text-gold">
                   {formatTime(event.start_time)}
                   {event.end_time ? (
@@ -144,6 +168,12 @@ function CalendarEmbed() {
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold text-primary">{event.title}</p>
+                  <p
+                    className="mt-1 text-xs font-semibold"
+                    style={{ color: categoryMeta(event.category).color }}
+                  >
+                    {categoryMeta(event.category).label}
+                  </p>
                   {event.location ? (
                     <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
                       <MapPin className="h-3.5 w-3.5" aria-hidden />

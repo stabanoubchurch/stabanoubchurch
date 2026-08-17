@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Card, Field, GhostButton, PrimaryButton, inputClass } from "./primitives";
 import { useDeleteRow, useRows, useSaveRow } from "./useCrud";
 import { formatLongDate, formatTime } from "@/lib/parish-format";
+import { EVENT_CATEGORIES, categoryMeta } from "@/lib/event-categories";
 
 type EventRow = {
   id: string;
@@ -13,6 +14,7 @@ type EventRow = {
   start_time: string | null;
   end_time: string | null;
   published: boolean;
+  category: string;
   recurring: boolean;
   repeat_until: string | null;
 };
@@ -26,6 +28,7 @@ const blank = (): EventRow => ({
   start_time: "",
   end_time: "",
   published: true,
+  category: "other_services",
   recurring: false,
   repeat_until: "",
 });
@@ -33,7 +36,7 @@ const blank = (): EventRow => ({
 export function EventsPanel() {
   const { data: events = [], isPending } = useRows<EventRow>(
     "events",
-    "id, title, description, location, event_date, start_time, end_time, published, recurring, repeat_until",
+    "id, title, description, location, event_date, start_time, end_time, published, category, recurring, repeat_until",
     [{ column: "event_date", ascending: false }, { column: "start_time" }],
   );
   const save = useSaveRow("events");
@@ -117,6 +120,28 @@ export function EventsPanel() {
                 onChange={(e) => setDraft({ ...draft, description: e.target.value })}
               />
             </Field>
+            <Field label="Category">
+              <div className="flex flex-wrap gap-2">
+                {EVENT_CATEGORIES.map((cat) => {
+                  const active = draft.category === cat.value;
+                  return (
+                    <button
+                      key={cat.value}
+                      type="button"
+                      onClick={() => setDraft({ ...draft, category: cat.value })}
+                      className={`flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors ${active ? "border-primary bg-secondary font-semibold text-primary" : "border-border text-primary hover:bg-secondary"}`}
+                    >
+                      <span
+                        className="h-3 w-3 rounded-full"
+                        style={{ backgroundColor: cat.color }}
+                        aria-hidden
+                      />
+                      {cat.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </Field>
             <div className="space-y-3 rounded-md border border-border p-3">
               <div className="flex flex-wrap gap-2">
                 <button
@@ -177,13 +202,19 @@ export function EventsPanel() {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="font-semibold text-primary">
+                    <span
+                      className="mr-2 inline-block h-2.5 w-2.5 rounded-full align-middle"
+                      style={{ backgroundColor: categoryMeta(event.category).color }}
+                      aria-hidden
+                    />
                     {event.title}{" "}
                     {!event.published ? (
                       <span className="text-xs text-muted-foreground">(hidden)</span>
                     ) : null}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {formatLongDate(event.event_date)} · {formatTime(event.start_time)}
+                    {categoryMeta(event.category).label} · {formatLongDate(event.event_date)} ·{" "}
+                    {formatTime(event.start_time)}
                     {event.recurring ? " · repeats weekly" : ""}
                   </p>
                 </div>
