@@ -95,8 +95,9 @@ function CalendarEmbed() {
             const count = dayEvents.length;
             const dots = [...new Set(dayEvents.map((e) => categoryMeta(e.category).color))].slice(
               0,
-              3,
+              4,
             );
+            const firstColor = dots[0];
             const isSelected = key === selected;
             const isToday = key === dateKey(today);
             return (
@@ -114,14 +115,18 @@ function CalendarEmbed() {
                   inMonth ? "text-foreground" : "text-muted-foreground/50",
                   isToday && !isSelected ? "border-gold" : "",
                 ].join(" ")}
+                style={!isSelected && firstColor ? { backgroundColor: `${firstColor}22` } : undefined}
               >
                 <span className={isSelected ? "font-semibold" : ""}>{day.getDate()}</span>
-                <span className="mt-1 flex h-1.5 gap-0.5">
+                <span className="mt-1.5 flex h-3 gap-1.5">
                   {dots.map((color, i) => (
                     <span
                       key={i}
-                      className="h-1.5 w-1.5 rounded-full"
-                      style={{ backgroundColor: isSelected ? "var(--primary-foreground)" : color }}
+                      className="h-3 w-3 rounded-full ring-1 ring-black/10"
+                      style={{
+                        backgroundColor: isSelected ? "var(--primary-foreground)" : color,
+                      }}
+                      aria-hidden
                     />
                   ))}
                 </span>
@@ -132,9 +137,9 @@ function CalendarEmbed() {
 
         <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-border pt-4 text-xs text-muted-foreground">
           {EVENT_CATEGORIES.map((cat) => (
-            <li key={cat.value} className="flex items-center gap-1.5">
+            <li key={cat.value} className="flex items-center gap-2 rounded-md bg-white/50 px-2 py-1">
               <span
-                className="h-2.5 w-2.5 rounded-full"
+                className="h-3 w-3 rounded-full ring-1 ring-black/10"
                 style={{ backgroundColor: cat.color }}
                 aria-hidden
               />
@@ -155,7 +160,7 @@ function CalendarEmbed() {
             {selectedEvents.map((event) => (
               <li
                 key={event.id}
-                className="flex gap-4 border-l-4 py-4 pl-3"
+                className="flex gap-4 border-l-[6px] py-4 pl-4"
                 style={{ borderLeftColor: categoryMeta(event.category).color }}
               >
                 <div className="w-24 shrink-0 text-sm font-semibold text-gold">
@@ -168,12 +173,15 @@ function CalendarEmbed() {
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold text-primary">{event.title}</p>
-                  <p
-                    className="mt-1 text-xs font-semibold"
-                    style={{ color: categoryMeta(event.category).color }}
+                  <span
+                    className="mt-1.5 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide"
+                    style={{
+                      backgroundColor: `${categoryMeta(event.category).color}25`,
+                      color: categoryMeta(event.category).color,
+                    }}
                   >
                     {categoryMeta(event.category).label}
-                  </p>
+                  </span>
                   {event.location ? (
                     <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
                       <MapPin className="h-3.5 w-3.5" aria-hidden />
