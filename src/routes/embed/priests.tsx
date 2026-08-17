@@ -40,7 +40,7 @@ function PriestsEmbed() {
               key={priest.id}
               className="flex flex-col gap-6 rounded-lg border border-border bg-card p-6 sm:flex-row"
             >
-              <div className="h-40 w-40 shrink-0 overflow-hidden rounded-md bg-secondary">
+              <div className="h-40 w-40 shrink-0 overflow-hidden rounded-full bg-secondary">
                 {priest.photo_url ? (
                   <img
                     src={priest.photo_url}
