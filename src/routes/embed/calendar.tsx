@@ -98,6 +98,8 @@ function CalendarEmbed() {
               4,
             );
             const firstColor = dots[0];
+            const isSelected = key === selected;
+            const isToday = key === dateKey(today);
             return (
               <button
                 key={key}
