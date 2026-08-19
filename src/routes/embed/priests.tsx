@@ -57,12 +57,12 @@ function PriestsEmbed() {
               <div className="min-w-0 flex-1">
                 <h2 className="text-center text-2xl text-primary sm:text-left">{priest.name}</h2>
                 {priest.role ? (
-                  <p className="mt-1 text-sm font-semibold tracking-wide text-gold uppercase">
+                  <p className="mt-1 text-center text-sm font-semibold tracking-wide text-gold uppercase sm:text-left">
                     {priest.role}
                   </p>
                 ) : null}
                 {priest.bio ? (
-                  <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-slate">
+                  <p className="mt-3 whitespace-pre-line text-center text-sm leading-relaxed text-slate sm:text-left">
                     {priest.bio}
                   </p>
                 ) : null}
