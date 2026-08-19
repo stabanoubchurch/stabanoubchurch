@@ -43,6 +43,7 @@ export type SpotlightPost = {
   title: string;
   caption: string;
   image_url: string | null;
+  avatar_url: string | null;
   service_name: string | null;
   posted_on: string;
   hearts: number;
@@ -183,14 +184,17 @@ export async function loadSpotlight(): Promise<SpotlightPost[]> {
   const client = publicClient();
   const { data, error } = await client
     .from("spotlight_posts")
-    .select("id, title, caption, image_url, service_name, posted_on")
+    .select("id, title, caption, image_url, avatar_url, service_name, posted_on")
     .eq("published", true)
     .order("posted_on", { ascending: false })
     .limit(60);
   if (error) throw error;
   const rows = data ?? [];
   const ids = rows.map((r) => r.id);
-  const signed = await signMedia(client, rows.map((r) => r.image_url));
+  const signed = await signMedia(
+    client,
+    rows.flatMap((r) => [r.image_url, r.avatar_url]),
+  );
   let reactions: { post_id: string; kind: string }[] = [];
   if (ids.length) {
     const { data: reactionRows } = await client
@@ -204,6 +208,7 @@ export async function loadSpotlight(): Promise<SpotlightPost[]> {
     title: r.title,
     caption: r.caption,
     image_url: r.image_url ? (signed[r.image_url] ?? r.image_url) : null,
+    avatar_url: r.avatar_url ? (signed[r.avatar_url] ?? r.avatar_url) : null,
     service_name: r.service_name,
     posted_on: r.posted_on,
     hearts: reactions.filter((x) => x.post_id === r.id && x.kind === "heart").length,
