@@ -13,6 +13,7 @@ type PostRow = {
   avatar_url: string | null;
   service_name: string | null;
   posted_on: string;
+  scheduled_for: string | null;
   published: boolean;
 };
 
@@ -24,13 +25,14 @@ const blank = (): PostRow => ({
   avatar_url: null,
   service_name: "",
   posted_on: new Date().toISOString().slice(0, 10),
+  scheduled_for: null,
   published: true,
 });
 
 export function SpotlightPanel() {
   const { data: posts = [], isPending } = useRows<PostRow>(
     "spotlight_posts",
-    "id, title, caption, image_url, avatar_url, service_name, posted_on, published",
+    "id, title, caption, image_url, avatar_url, service_name, posted_on, scheduled_for, published",
     [{ column: "posted_on", ascending: false }],
   );
   const save = useSaveRow("spotlight_posts");
@@ -41,7 +43,11 @@ export function SpotlightPanel() {
     event.preventDefault();
     if (!draft) return;
     const { id, ...rest } = draft;
-    const payload = { ...rest, service_name: rest.service_name || null };
+    const payload = {
+      ...rest,
+      service_name: rest.service_name || null,
+      scheduled_for: rest.scheduled_for || null,
+    };
     await save.mutateAsync(id ? { id, ...payload } : payload);
     setDraft(null);
   };
@@ -79,6 +85,20 @@ export function SpotlightPanel() {
                   value={draft.posted_on}
                   onChange={(e) => setDraft({ ...draft, posted_on: e.target.value })}
                 />
+              </Field>
+              <Field label="Schedule for (optional)">
+                <input
+                  type="date"
+                  className={inputClass}
+                  value={draft.scheduled_for ?? ""}
+                  onChange={(e) =>
+                    setDraft({ ...draft, scheduled_for: e.target.value || null })
+                  }
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Leave empty to publish immediately. If set, the post stays hidden until this
+                  date.
+                </p>
               </Field>
             </div>
             <Field label="Caption">
@@ -144,6 +164,11 @@ export function SpotlightPanel() {
                     {formatLongDate(post.posted_on)}
                     {post.service_name ? ` · ${post.service_name}` : ""}
                   </p>
+                  {post.scheduled_for && post.scheduled_for > new Date().toISOString().slice(0, 10) ? (
+                    <p className="text-sm text-gold">
+                      Scheduled for {formatLongDate(post.scheduled_for)}
+                    </p>
+                  ) : null}
                 </div>
                 <div className="flex gap-2">
                   <GhostButton onClick={() => setDraft(post)}>Edit</GhostButton>
