@@ -46,6 +46,7 @@ export type SpotlightPost = {
   avatar_url: string | null;
   service_name: string | null;
   posted_on: string;
+  scheduled_for: string | null;
   hearts: number;
   thumbsups: number;
 };
@@ -184,8 +185,9 @@ export async function loadSpotlight(): Promise<SpotlightPost[]> {
   const client = publicClient();
   const { data, error } = await client
     .from("spotlight_posts")
-    .select("id, title, caption, image_url, avatar_url, service_name, posted_on")
+    .select("id, title, caption, image_url, avatar_url, service_name, posted_on, scheduled_for")
     .eq("published", true)
+    .or(`scheduled_for.is.null,scheduled_for.lte.${new Date().toISOString().slice(0, 10)}`)
     .order("posted_on", { ascending: false })
     .limit(60);
   if (error) throw error;
@@ -211,6 +213,7 @@ export async function loadSpotlight(): Promise<SpotlightPost[]> {
     avatar_url: r.avatar_url ? (signed[r.avatar_url] ?? r.avatar_url) : null,
     service_name: r.service_name,
     posted_on: r.posted_on,
+    scheduled_for: r.scheduled_for,
     hearts: reactions.filter((x) => x.post_id === r.id && x.kind === "heart").length,
     thumbsups: reactions.filter((x) => x.post_id === r.id && x.kind === "thumbsup").length,
   }));
