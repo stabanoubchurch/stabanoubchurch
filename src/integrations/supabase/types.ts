@@ -180,6 +180,7 @@ export type Database = {
       }
       spotlight_posts: {
         Row: {
+          avatar_url: string | null
           caption: string
           created_at: string
           id: string
@@ -191,6 +192,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          avatar_url?: string | null
           caption?: string
           created_at?: string
           id?: string
@@ -202,6 +204,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          avatar_url?: string | null
           caption?: string
           created_at?: string
           id?: string
