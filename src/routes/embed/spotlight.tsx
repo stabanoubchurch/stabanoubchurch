@@ -93,9 +93,18 @@ function SpotlightEmbed() {
                 className="overflow-hidden rounded-lg border border-border bg-card"
               >
                 <div className="flex items-center gap-3 px-4 py-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary font-display text-sm text-primary-foreground">
-                    {(post.service_name ?? "Parish").slice(0, 1)}
-                  </span>
+                  {post.avatar_url ? (
+                    <img
+                      src={post.avatar_url}
+                      alt={`${post.service_name || "Parish"} profile picture`}
+                      loading="lazy"
+                      className="h-9 w-9 shrink-0 rounded-full bg-secondary object-cover"
+                    />
+                  ) : (
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary font-display text-sm text-primary-foreground">
+                      {(post.service_name ?? "Parish").slice(0, 1)}
+                    </span>
+                  )}
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-primary">
                       {post.service_name || "Parish"}
