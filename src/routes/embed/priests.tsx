@@ -69,7 +69,7 @@ function PriestsEmbed() {
                 <div className="mt-4 flex flex-wrap gap-4 text-sm">
                   {priest.email ? (
                     <a
-                      className="inline-flex items-center gap-2 text-primary underline underline-offset-2 hover:text-gold"
+                      className="inline-flex items-center gap-2 text-primary hover:text-gold"
                       href={`mailto:${priest.email}`}
                     >
                       <Mail className="h-4 w-4" aria-hidden />
@@ -78,7 +78,7 @@ function PriestsEmbed() {
                   ) : null}
                   {priest.phone ? (
                     <a
-                      className="inline-flex items-center gap-2 text-primary underline underline-offset-2 hover:text-gold"
+                      className="inline-flex items-center gap-2 text-primary hover:text-gold"
                       href={`tel:${priest.phone.replace(/\s+/g, "")}`}
                     >
                       <Phone className="h-4 w-4" aria-hidden />
