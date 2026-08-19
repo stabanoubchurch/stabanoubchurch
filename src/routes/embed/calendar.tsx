@@ -118,11 +118,11 @@ function CalendarEmbed() {
                 style={!isSelected && firstColor ? { backgroundColor: `${firstColor}22` } : undefined}
               >
                 <span className={isSelected ? "font-semibold" : ""}>{day.getDate()}</span>
-                <span className="mt-1.5 flex h-2 gap-1.5">
+                <span className="mt-1.5 flex h-1.5 gap-1.5">
                   {dots.map((color, i) => (
                     <span
                       key={i}
-                      className="h-2 w-2 rounded-full ring-1 ring-black/10"
+                      className="h-1.5 w-1.5 rounded-full ring-1 ring-black/10"
                       style={{
                         backgroundColor: isSelected ? "var(--primary-foreground)" : color,
                       }}
@@ -139,7 +139,7 @@ function CalendarEmbed() {
           {EVENT_CATEGORIES.map((cat) => (
             <li key={cat.value} className="flex items-center gap-2 rounded-md bg-white/50 px-2 py-1">
               <span
-                className="h-2 w-2 rounded-full ring-1 ring-black/10"
+                className="h-1.5 w-1.5 rounded-full ring-1 ring-black/10"
                 style={{ backgroundColor: cat.color }}
                 aria-hidden
               />
