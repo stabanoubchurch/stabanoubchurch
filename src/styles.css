@@ -71,7 +71,7 @@
 :root {
   --radius: 0.375rem;
   /* Event category colours — high saturation so they read on the calendar */
-  --cat-liturgies: oklch(0.55 0.25 25);
+  --cat-liturgies: oklch(0.68 0.2 25);
   --cat-youth-bible-study: oklch(0.72 0.18 15);
   --cat-sunday-school: oklch(0.75 0.16 300);
   --cat-other-services: oklch(0.82 0.12 240);
