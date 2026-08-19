@@ -71,14 +71,13 @@
 :root {
   --radius: 0.375rem;
   /* Event category colours — high saturation so they read on the calendar */
-  --cat-liturgies: oklch(0.55 0.2 232);
-  --cat-bible-study: oklch(0.65 0.2 45);
-  --cat-sunday-school: oklch(0.65 0.2 145);
-  --cat-youth-meetings: oklch(0.6 0.2 285);
-  --cat-other-services: oklch(0.6 0.15 245);
-  --cat-church-events: oklch(0.6 0.22 25);
-  --cat-feasts: oklch(0.75 0.18 85);
-  --cat-fasts: oklch(0.55 0.15 300);
+  --cat-liturgies: oklch(0.55 0.25 25);
+  --cat-youth-bible-study: oklch(0.72 0.18 15);
+  --cat-sunday-school: oklch(0.75 0.16 300);
+  --cat-other-services: oklch(0.82 0.12 240);
+  --cat-feasts-fasts: oklch(0.82 0.18 145);
+  --cat-church-events: oklch(0.88 0.18 95);
+
   /* Parish palette: #F7EFE3 cream, #223B4A teal, #3D4E56 slate, #C9994A gold,
      #D9E2F1 mist, #7B7B7B grey */
   --background: oklch(0.955 0.019 78.5);
