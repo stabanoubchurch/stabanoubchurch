@@ -187,6 +187,7 @@ export type Database = {
           image_url: string | null
           posted_on: string
           published: boolean
+          scheduled_for: string | null
           service_name: string | null
           title: string
           updated_at: string
@@ -199,6 +200,7 @@ export type Database = {
           image_url?: string | null
           posted_on?: string
           published?: boolean
+          scheduled_for?: string | null
           service_name?: string | null
           title?: string
           updated_at?: string
@@ -211,6 +213,7 @@ export type Database = {
           image_url?: string | null
           posted_on?: string
           published?: boolean
+          scheduled_for?: string | null
           service_name?: string | null
           title?: string
           updated_at?: string
