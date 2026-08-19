@@ -1,22 +1,18 @@
 export type EventCategory =
   | "liturgies"
-  | "bible_study"
+  | "youth_bible_study"
   | "sunday_school"
-  | "youth_meetings"
   | "other_services"
-  | "church_events"
-  | "feasts"
-  | "fasts";
+  | "feasts_fasts"
+  | "church_events";
 
 export const EVENT_CATEGORIES: { value: EventCategory; label: string; color: string }[] = [
   { value: "liturgies", label: "Liturgies", color: "var(--cat-liturgies)" },
-  { value: "bible_study", label: "Bible study", color: "var(--cat-bible-study)" },
-  { value: "sunday_school", label: "Sunday school", color: "var(--cat-sunday-school)" },
-  { value: "youth_meetings", label: "Youth meetings", color: "var(--cat-youth-meetings)" },
-  { value: "other_services", label: "Other services", color: "var(--cat-other-services)" },
-  { value: "church_events", label: "Church events", color: "var(--cat-church-events)" },
-  { value: "feasts", label: "Feasts", color: "var(--cat-feasts)" },
-  { value: "fasts", label: "Fasts", color: "var(--cat-fasts)" },
+  { value: "youth_bible_study", label: "Youth and Bible Study", color: "var(--cat-youth-bible-study)" },
+  { value: "sunday_school", label: "Sunday School", color: "var(--cat-sunday-school)" },
+  { value: "other_services", label: "Other Services", color: "var(--cat-other-services)" },
+  { value: "feasts_fasts", label: "Feasts and Fasts", color: "var(--cat-feasts-fasts)" },
+  { value: "church_events", label: "Church Events", color: "var(--cat-church-events)" },
 ];
 
 export function categoryMeta(value: string | null | undefined) {
