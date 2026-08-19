@@ -5,7 +5,7 @@ import { Mail, Phone } from "lucide-react";
 import { EmbedShell, EmptyState } from "@/components/embed/EmbedShell";
 import { getPriests } from "@/lib/parish.functions";
 
-const priestsQuery = queryOptions({
+export const priestsQuery = queryOptions({
   queryKey: ["priests"],
   queryFn: () => getPriests(),
 });
