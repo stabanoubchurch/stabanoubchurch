@@ -10,6 +10,7 @@ type PostRow = {
   title: string;
   caption: string;
   image_url: string | null;
+  avatar_url: string | null;
   service_name: string | null;
   posted_on: string;
   published: boolean;
@@ -20,6 +21,7 @@ const blank = (): PostRow => ({
   title: "",
   caption: "",
   image_url: null,
+  avatar_url: null,
   service_name: "",
   posted_on: new Date().toISOString().slice(0, 10),
   published: true,
@@ -28,7 +30,7 @@ const blank = (): PostRow => ({
 export function SpotlightPanel() {
   const { data: posts = [], isPending } = useRows<PostRow>(
     "spotlight_posts",
-    "id, title, caption, image_url, service_name, posted_on, published",
+    "id, title, caption, image_url, avatar_url, service_name, posted_on, published",
     [{ column: "posted_on", ascending: false }],
   );
   const save = useSaveRow("spotlight_posts");
@@ -85,6 +87,13 @@ export function SpotlightPanel() {
                 className={inputClass}
                 value={draft.caption}
                 onChange={(e) => setDraft({ ...draft, caption: e.target.value })}
+              />
+            </Field>
+            <Field label="Profile picture">
+              <MediaInput
+                value={draft.avatar_url}
+                folder="spotlight-avatars"
+                onChange={(avatar_url) => setDraft({ ...draft, avatar_url })}
               />
             </Field>
             <Field label="Photo">
