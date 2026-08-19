@@ -55,7 +55,7 @@ function PriestsEmbed() {
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <h2 className="text-2xl text-primary">{priest.name}</h2>
+                <h2 className="text-center text-2xl text-primary sm:text-left">{priest.name}</h2>
                 {priest.role ? (
                   <p className="mt-1 text-sm font-semibold tracking-wide text-gold uppercase">
                     {priest.role}

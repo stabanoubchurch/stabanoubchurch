@@ -33,10 +33,10 @@ export function EmbedShell({
   return (
     <div ref={ref} className="min-h-screen bg-background px-4 py-8 sm:px-6 sm:py-10">
       <div className="mx-auto w-full max-w-4xl">
-        <header className="mb-8">
-          <span className="block h-px w-12 bg-gold" />
+        <header className="mb-8 text-center">
+          <span className="mx-auto block h-px w-12 bg-gold" />
           <h1 className="mt-4 text-4xl text-primary sm:text-5xl">{title}</h1>
-          {intro ? <p className="mt-3 max-w-2xl text-muted-foreground">{intro}</p> : null}
+          {intro ? <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">{intro}</p> : null}
         </header>
         {children}
       </div>
