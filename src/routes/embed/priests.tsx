@@ -66,7 +66,7 @@ function PriestsEmbed() {
                     {priest.bio}
                   </p>
                 ) : null}
-                <div className="mt-4 flex flex-wrap gap-4 text-sm">
+                <div className="mt-4 flex flex-wrap justify-center gap-4 text-sm sm:justify-start">
                   {priest.email ? (
                     <a
                       className="inline-flex items-center gap-2 text-primary hover:text-gold"
