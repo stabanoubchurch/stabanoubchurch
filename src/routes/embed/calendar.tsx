@@ -50,6 +50,22 @@ function startOfWeek(date: Date) {
   return addDays(date, -date.getDay());
 }
 
+/** "18:30:00" -> 1110 minutes. Null for all-day items. */
+function toMinutes(value: string | null): number | null {
+  if (!value) return null;
+  const [h, m] = value.split(":").map(Number);
+  if (Number.isNaN(h)) return null;
+  return h * 60 + (m || 0);
+}
+
+const HOUR_HEIGHT = 56;
+
+function hourLabel(hour: number) {
+  const suffix = hour >= 12 ? "pm" : "am";
+  const display = hour % 12 === 0 ? 12 : hour % 12;
+  return `${display} ${suffix}`;
+}
+
 function CalendarEmbed() {
   const today = new Date();
   const [view, setView] = useState<ViewMode>("month");
@@ -214,69 +230,161 @@ function CalendarEmbed() {
           </>
         ) : null}
 
-        {view === "week" ? (
-          <div className="-mx-1 overflow-x-auto px-1">
-            <div className="grid min-w-[640px] grid-cols-7 items-start gap-2">
-              {weekDays.map((day) => {
-                const key = dateKey(day);
-                const dayEvents = eventsOn(key);
-                const isSelected = key === selected;
-                return (
-                  <div
-                    key={key}
-                    className={[
-                      "flex flex-col overflow-hidden rounded-md border transition-colors",
-                      isSelected ? "border-primary bg-secondary" : "border-border bg-card",
-                    ].join(" ")}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setSelected(key)}
-                      aria-pressed={isSelected}
-                      className={[
-                        "sticky top-0 z-10 border-b px-2 py-1.5 text-center backdrop-blur",
-                        isSelected
-                          ? "border-primary/30 bg-primary text-primary-foreground"
-                          : "border-border bg-secondary/80 text-primary hover:bg-secondary",
-                      ].join(" ")}
-                    >
-                      <span className="block text-[10px] font-semibold uppercase tracking-wide opacity-80">
-                        {DAY_NAMES[day.getDay()].slice(0, 3)}
-                      </span>
-                      <span className="block text-base font-semibold leading-tight">
-                        {day.getDate()}
-                      </span>
-                    </button>
-                    <ul className="flex-1 space-y-1 p-1.5">
-                      {dayEvents.length === 0 ? (
-                        <li className="py-1 text-center text-[11px] text-muted-foreground/70">—</li>
-                      ) : (
-                        dayEvents.map((event) => (
-                          <li key={event.id}>
-                            <button
-                              type="button"
-                              onClick={() => setSelected(key)}
-                              className="w-full rounded border-l-[4px] px-1.5 py-1 text-left text-[11px] leading-snug text-primary"
-                              style={{
-                                borderLeftColor: categoryMeta(event.category).color,
-                                backgroundColor: `${categoryMeta(event.category).color}33`,
-                              }}
-                            >
-                              <span className="block font-semibold">
-                                {formatTime(event.start_time)}
-                              </span>
-                              <span className="block break-words">{event.title}</span>
-                            </button>
-                          </li>
-                        ))
-                      )}
-                    </ul>
+        {view === "week"
+          ? (() => {
+              const weekEvents = weekDays.flatMap((day) => eventsOn(dateKey(day)));
+              const timed = weekEvents
+                .map((e) => toMinutes(e.start_time))
+                .filter((m): m is number => m !== null);
+              const startHour = timed.length ? Math.max(0, Math.min(...timed) / 60 - 1) : 7;
+              const endHour = timed.length ? Math.min(24, Math.max(...timed) / 60 + 2) : 20;
+              const firstHour = Math.floor(startHour);
+              const lastHour = Math.max(firstHour + 4, Math.ceil(endHour));
+              const hours = Array.from({ length: lastHour - firstHour }, (_, i) => firstHour + i);
+              const gridHeight = hours.length * HOUR_HEIGHT;
+
+              return (
+                <div className="-mx-1 overflow-x-auto px-1">
+                  <div className="min-w-[680px]">
+                    {/* Day headers */}
+                    <div className="grid grid-cols-[3.5rem_repeat(7,minmax(0,1fr))] gap-1">
+                      <div />
+                      {weekDays.map((day) => {
+                        const key = dateKey(day);
+                        const isSelected = key === selected;
+                        const isToday = key === dateKey(today);
+                        return (
+                          <button
+                            key={key}
+                            type="button"
+                            onClick={() => setSelected(key)}
+                            aria-pressed={isSelected}
+                            className={[
+                              "rounded-md border px-2 py-1.5 text-center transition-colors",
+                              isSelected
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : isToday
+                                  ? "border-gold bg-secondary/60 text-primary hover:bg-secondary"
+                                  : "border-border bg-secondary/50 text-primary hover:bg-secondary",
+                            ].join(" ")}
+                          >
+                            <span className="block text-[10px] font-semibold uppercase tracking-wide opacity-80">
+                              {DAY_NAMES[day.getDay()].slice(0, 3)}
+                            </span>
+                            <span className="block text-base font-semibold leading-tight">
+                              {day.getDate()}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* All-day row */}
+                    {weekEvents.some((e) => !e.start_time) ? (
+                      <div className="mt-1 grid grid-cols-[3.5rem_repeat(7,minmax(0,1fr))] gap-1">
+                        <div className="pt-1 text-right text-[10px] uppercase tracking-wide text-muted-foreground">
+                          All day
+                        </div>
+                        {weekDays.map((day) => {
+                          const key = dateKey(day);
+                          return (
+                            <div key={key} className="space-y-1">
+                              {eventsOn(key)
+                                .filter((e) => !e.start_time)
+                                .map((event) => (
+                                  <button
+                                    key={event.id}
+                                    type="button"
+                                    onClick={() => setSelected(key)}
+                                    className="w-full rounded border-l-[3px] px-1.5 py-1 text-left text-[11px] font-semibold leading-snug text-primary"
+                                    style={{
+                                      borderLeftColor: categoryMeta(event.category).color,
+                                      backgroundColor: `${categoryMeta(event.category).color}33`,
+                                    }}
+                                  >
+                                    {event.title}
+                                  </button>
+                                ))}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : null}
+
+                    {/* Time grid */}
+                    <div className="mt-1 grid grid-cols-[3.5rem_repeat(7,minmax(0,1fr))] gap-1">
+                      <div className="relative" style={{ height: gridHeight }}>
+                        {hours.map((hour, i) => (
+                          <span
+                            key={hour}
+                            className="absolute right-1 -translate-y-1/2 text-[10px] text-muted-foreground"
+                            style={{ top: i * HOUR_HEIGHT }}
+                          >
+                            {hourLabel(hour)}
+                          </span>
+                        ))}
+                      </div>
+
+                      {weekDays.map((day) => {
+                        const key = dateKey(day);
+                        const isSelected = key === selected;
+                        const dayEvents = eventsOn(key).filter((e) => e.start_time);
+                        return (
+                          <div
+                            key={key}
+                            className={[
+                              "relative rounded-md border",
+                              isSelected ? "border-primary bg-secondary/40" : "border-border bg-card",
+                            ].join(" ")}
+                            style={{ height: gridHeight }}
+                          >
+                            {hours.map((hour, i) =>
+                              i === 0 ? null : (
+                                <span
+                                  key={hour}
+                                  className="absolute inset-x-0 border-t border-border/60"
+                                  style={{ top: i * HOUR_HEIGHT }}
+                                  aria-hidden
+                                />
+                              ),
+                            )}
+                            {dayEvents.map((event) => {
+                              const start = toMinutes(event.start_time)!;
+                              const end = toMinutes(event.end_time);
+                              const top = ((start - firstHour * 60) / 60) * HOUR_HEIGHT;
+                              const duration = end && end > start ? end - start : 60;
+                              const height = Math.max(24, (duration / 60) * HOUR_HEIGHT - 2);
+                              const color = categoryMeta(event.category).color;
+                              return (
+                                <button
+                                  key={event.id}
+                                  type="button"
+                                  onClick={() => setSelected(key)}
+                                  title={`${formatTime(event.start_time)} ${event.title}`}
+                                  className="absolute inset-x-1 overflow-hidden rounded border-l-[3px] px-1.5 py-1 text-left text-[11px] leading-tight text-primary"
+                                  style={{
+                                    top,
+                                    height,
+                                    borderLeftColor: color,
+                                    backgroundColor: `${color}40`,
+                                  }}
+                                >
+                                  <span className="block font-semibold">
+                                    {formatTime(event.start_time)}
+                                  </span>
+                                  <span className="block break-words">{event.title}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        ) : null}
+                </div>
+              );
+            })()
+          : null}
 
 
         <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-border pt-4 text-xs text-muted-foreground">
