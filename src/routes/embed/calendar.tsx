@@ -50,6 +50,22 @@ function startOfWeek(date: Date) {
   return addDays(date, -date.getDay());
 }
 
+/** "18:30:00" -> 1110 minutes. Null for all-day items. */
+function toMinutes(value: string | null): number | null {
+  if (!value) return null;
+  const [h, m] = value.split(":").map(Number);
+  if (Number.isNaN(h)) return null;
+  return h * 60 + (m || 0);
+}
+
+const HOUR_HEIGHT = 56;
+
+function hourLabel(hour: number) {
+  const suffix = hour >= 12 ? "pm" : "am";
+  const display = hour % 12 === 0 ? 12 : hour % 12;
+  return `${display} ${suffix}`;
+}
+
 function CalendarEmbed() {
   const today = new Date();
   const [view, setView] = useState<ViewMode>("month");
