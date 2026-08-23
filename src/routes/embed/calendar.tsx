@@ -110,7 +110,7 @@ function CalendarEmbed() {
   })();
 
   return (
-    <EmbedShell title="Calendar" intro="Choose a day, week or month to see what's happening.">
+    <EmbedShell title="Calendar" intro="Choose a day, week or month to see which services are on.">
       <div className="rounded-lg border border-border bg-card p-4 sm:p-6">
         <div className="mb-4 flex flex-wrap items-center justify-center gap-2 sm:justify-end">
           {VIEWS.map((option) => (
