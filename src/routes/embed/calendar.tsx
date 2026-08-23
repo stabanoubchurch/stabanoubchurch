@@ -215,49 +215,69 @@ function CalendarEmbed() {
         ) : null}
 
         {view === "week" ? (
-          <div className="grid gap-2 sm:grid-cols-7">
-            {weekDays.map((day) => {
-              const key = dateKey(day);
-              const dayEvents = eventsOn(key);
-              const isSelected = key === selected;
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setSelected(key)}
-                  aria-pressed={isSelected}
-                  className={[
-                    "rounded-md border p-2 text-left transition-colors",
-                    isSelected ? "border-primary bg-secondary" : "border-border hover:bg-secondary",
-                  ].join(" ")}
-                >
-                  <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    {DAY_NAMES[day.getDay()].slice(0, 3)} {day.getDate()}
-                  </p>
-                  <ul className="mt-2 space-y-1">
-                    {dayEvents.length === 0 ? (
-                      <li className="text-xs text-muted-foreground/70">—</li>
-                    ) : (
-                      dayEvents.map((event) => (
-                        <li
-                          key={event.id}
-                          className="truncate rounded border-l-[4px] px-1.5 py-1 text-xs text-primary"
-                          style={{
-                            borderLeftColor: categoryMeta(event.category).color,
-                            backgroundColor: `${categoryMeta(event.category).color}20`,
-                          }}
-                        >
-                          <span className="font-semibold">{formatTime(event.start_time)}</span>{" "}
-                          {event.title}
-                        </li>
-                      ))
-                    )}
-                  </ul>
-                </button>
-              );
-            })}
+          <div className="-mx-1 overflow-x-auto px-1">
+            <div className="grid min-w-[640px] grid-cols-7 items-start gap-2">
+              {weekDays.map((day) => {
+                const key = dateKey(day);
+                const dayEvents = eventsOn(key);
+                const isSelected = key === selected;
+                return (
+                  <div
+                    key={key}
+                    className={[
+                      "flex flex-col overflow-hidden rounded-md border transition-colors",
+                      isSelected ? "border-primary bg-secondary" : "border-border bg-card",
+                    ].join(" ")}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setSelected(key)}
+                      aria-pressed={isSelected}
+                      className={[
+                        "sticky top-0 z-10 border-b px-2 py-1.5 text-center backdrop-blur",
+                        isSelected
+                          ? "border-primary/30 bg-primary text-primary-foreground"
+                          : "border-border bg-secondary/80 text-primary hover:bg-secondary",
+                      ].join(" ")}
+                    >
+                      <span className="block text-[10px] font-semibold uppercase tracking-wide opacity-80">
+                        {DAY_NAMES[day.getDay()].slice(0, 3)}
+                      </span>
+                      <span className="block text-base font-semibold leading-tight">
+                        {day.getDate()}
+                      </span>
+                    </button>
+                    <ul className="flex-1 space-y-1 p-1.5">
+                      {dayEvents.length === 0 ? (
+                        <li className="py-1 text-center text-[11px] text-muted-foreground/70">—</li>
+                      ) : (
+                        dayEvents.map((event) => (
+                          <li key={event.id}>
+                            <button
+                              type="button"
+                              onClick={() => setSelected(key)}
+                              className="w-full rounded border-l-[4px] px-1.5 py-1 text-left text-[11px] leading-snug text-primary"
+                              style={{
+                                borderLeftColor: categoryMeta(event.category).color,
+                                backgroundColor: `${categoryMeta(event.category).color}33`,
+                              }}
+                            >
+                              <span className="block font-semibold">
+                                {formatTime(event.start_time)}
+                              </span>
+                              <span className="block break-words">{event.title}</span>
+                            </button>
+                          </li>
+                        ))
+                      )}
+                    </ul>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         ) : null}
+
 
         <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-border pt-4 text-xs text-muted-foreground">
           {EVENT_CATEGORIES.map((cat) => (
