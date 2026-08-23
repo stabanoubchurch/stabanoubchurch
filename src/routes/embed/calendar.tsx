@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useQueries } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 
 import { EmbedShell } from "@/components/embed/EmbedShell";
@@ -22,118 +22,242 @@ export const Route = createFileRoute("/embed/calendar")({
       { title: "Calendar" },
       {
         name: "description",
-        content: "Monthly parish calendar — tap any day to see the full timetable of events.",
+        content: "Parish calendar in day, week or month view — see the full timetable of events.",
       },
       { property: "og:title", content: "Calendar" },
       {
         property: "og:description",
-        content: "Monthly parish calendar — tap any day to see the full timetable of events.",
+        content: "Parish calendar in day, week or month view — see the full timetable of events.",
       },
     ],
   }),
   component: CalendarEmbed,
 });
 
+type ViewMode = "day" | "week" | "month";
+
+const VIEWS: { value: ViewMode; label: string }[] = [
+  { value: "day", label: "Day" },
+  { value: "week", label: "Week" },
+  { value: "month", label: "Month" },
+];
+
+function addDays(date: Date, days: number) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
+}
+
+function startOfWeek(date: Date) {
+  return addDays(date, -date.getDay());
+}
+
 function CalendarEmbed() {
   const today = new Date();
+  const [view, setView] = useState<ViewMode>("month");
   const [cursor, setCursor] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [selected, setSelected] = useState<string>(dateKey(today));
 
-  const month = monthKey(cursor);
-  const { data: events = [], isPending } = useQuery({
-    queryKey: ["events", month],
-    queryFn: () => getEvents({ data: { month } }),
+  const selectedDate = useMemo(() => {
+    const [y, m, d] = selected.split("-").map(Number);
+    return new Date(y, (m ?? 1) - 1, d ?? 1);
+  }, [selected]);
+
+  const weekStart = startOfWeek(selectedDate);
+  const weekDays = useMemo(
+    () => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
+    [weekStart.getTime()],
+  );
+
+  // Which months of data we need for the current view.
+  const months = useMemo(() => {
+    if (view === "month") return [monthKey(cursor)];
+    if (view === "day") return [monthKey(selectedDate)];
+    return [...new Set(weekDays.map(monthKey))];
+  }, [view, cursor, selectedDate, weekDays]);
+
+  const results = useQueries({
+    queries: months.map((month) => ({
+      queryKey: ["events", month],
+      queryFn: () => getEvents({ data: { month } }),
+    })),
   });
+  const events = results.flatMap((r) => r.data ?? []);
+  const isPending = results.some((r) => r.isPending);
 
   const grid = monthGrid(cursor.getFullYear(), cursor.getMonth());
-  const selectedEvents = events.filter((event) => event.event_date === selected);
+  const eventsOn = (key: string) => events.filter((event) => event.event_date === key);
+  const selectedEvents = eventsOn(selected);
 
   const step = (delta: number) => {
-    const next = new Date(cursor.getFullYear(), cursor.getMonth() + delta, 1);
-    setCursor(next);
+    if (view === "month") {
+      const next = new Date(cursor.getFullYear(), cursor.getMonth() + delta, 1);
+      setCursor(next);
+      setSelected(dateKey(next));
+      return;
+    }
+    const next = addDays(selectedDate, view === "week" ? delta * 7 : delta);
     setSelected(dateKey(next));
+    setCursor(new Date(next.getFullYear(), next.getMonth(), 1));
   };
 
+  const headingLabel = (() => {
+    if (view === "month") return `${MONTH_NAMES[cursor.getMonth()]} ${cursor.getFullYear()}`;
+    if (view === "day") return formatLongDate(selected);
+    const end = addDays(weekStart, 6);
+    const sameMonth = weekStart.getMonth() === end.getMonth();
+    return sameMonth
+      ? `${weekStart.getDate()}–${end.getDate()} ${MONTH_NAMES[end.getMonth()]} ${end.getFullYear()}`
+      : `${weekStart.getDate()} ${MONTH_NAMES[weekStart.getMonth()]} – ${end.getDate()} ${MONTH_NAMES[end.getMonth()]} ${end.getFullYear()}`;
+  })();
+
   return (
-    <EmbedShell title="Calendar" intro="Select a day to see everything happening.">
+    <EmbedShell title="Calendar" intro="Choose a day, week or month view.">
       <div className="rounded-lg border border-border bg-card p-4 sm:p-6">
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex flex-wrap items-center justify-center gap-2 sm:justify-end">
+          {VIEWS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setView(option.value)}
+              aria-pressed={view === option.value}
+              className={[
+                "rounded-md border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors",
+                view === option.value
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border text-primary hover:bg-secondary",
+              ].join(" ")}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="mb-4 flex items-center justify-between gap-2">
           <button
             type="button"
             onClick={() => step(-1)}
-            aria-label="Previous month"
+            aria-label={`Previous ${view}`}
             className="rounded-md border border-border p-2 text-primary transition-colors hover:bg-secondary"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <h2 className="text-2xl text-primary">
-            {MONTH_NAMES[cursor.getMonth()]} {cursor.getFullYear()}
-          </h2>
+          <h2 className="text-center text-xl text-primary sm:text-2xl">{headingLabel}</h2>
           <button
             type="button"
             onClick={() => step(1)}
-            aria-label="Next month"
+            aria-label={`Next ${view}`}
             className="rounded-md border border-border p-2 text-primary transition-colors hover:bg-secondary"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
-          {DAY_NAMES.map((day) => (
-            <div key={day} className="py-2">
-              {day.slice(0, 3)}
+        {view === "month" ? (
+          <>
+            <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+              {DAY_NAMES.map((day) => (
+                <div key={day} className="py-2">
+                  {day.slice(0, 3)}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        <div className="grid grid-cols-7 gap-1">
-          {grid.map((day) => {
-            const key = dateKey(day);
-            const inMonth = day.getMonth() === cursor.getMonth();
-            const dayEvents = events.filter((event) => event.event_date === key);
-            const count = dayEvents.length;
-            const dots = [...new Set(dayEvents.map((e) => categoryMeta(e.category).color))].slice(
-              0,
-              4,
-            );
-            const firstColor = dots[0];
-            const isSelected = key === selected;
-            const isToday = key === dateKey(today);
-            return (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setSelected(key)}
-                aria-label={`${formatLongDate(key)}, ${count} events`}
-                aria-pressed={isSelected}
-                className={[
-                  "flex aspect-square flex-col items-center justify-center rounded-md border text-sm transition-colors",
-                  isSelected
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-transparent hover:bg-secondary",
-                  inMonth ? "text-foreground" : "text-muted-foreground/50",
-                  isToday && !isSelected ? "border-gold" : "",
-                ].join(" ")}
-                style={!isSelected && firstColor ? { backgroundColor: `${firstColor}22` } : undefined}
-              >
-                <span className={isSelected ? "font-semibold" : ""}>{day.getDate()}</span>
-                <span className="mt-1.5 flex h-1.5 gap-1.5">
-                  {dots.map((color, i) => (
-                    <span
-                      key={i}
-                      className="h-1.5 w-1.5 rounded-full ring-1 ring-black/10"
-                      style={{
-                        backgroundColor: isSelected ? "var(--primary-foreground)" : color,
-                      }}
-                      aria-hidden
-                    />
-                  ))}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+            <div className="grid grid-cols-7 gap-1">
+              {grid.map((day) => {
+                const key = dateKey(day);
+                const inMonth = day.getMonth() === cursor.getMonth();
+                const dayEvents = eventsOn(key);
+                const count = dayEvents.length;
+                const dots = [
+                  ...new Set(dayEvents.map((e) => categoryMeta(e.category).color)),
+                ].slice(0, 4);
+                const firstColor = dots[0];
+                const isSelected = key === selected;
+                const isToday = key === dateKey(today);
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setSelected(key)}
+                    aria-label={`${formatLongDate(key)}, ${count} events`}
+                    aria-pressed={isSelected}
+                    className={[
+                      "flex aspect-square flex-col items-center justify-center rounded-md border text-sm transition-colors",
+                      isSelected
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-transparent hover:bg-secondary",
+                      inMonth ? "text-foreground" : "text-muted-foreground/50",
+                      isToday && !isSelected ? "border-gold" : "",
+                    ].join(" ")}
+                    style={
+                      !isSelected && firstColor
+                        ? { backgroundColor: `${firstColor}22` }
+                        : undefined
+                    }
+                  >
+                    <span className={isSelected ? "font-semibold" : ""}>{day.getDate()}</span>
+                    <span className="mt-1.5 flex h-1.5 gap-1.5">
+                      {dots.map((color, i) => (
+                        <span
+                          key={i}
+                          className="h-1.5 w-1.5 rounded-full ring-1 ring-black/10"
+                          style={{
+                            backgroundColor: isSelected ? "var(--primary-foreground)" : color,
+                          }}
+                          aria-hidden
+                        />
+                      ))}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        ) : null}
+
+        {view === "week" ? (
+          <div className="grid gap-2 sm:grid-cols-7">
+            {weekDays.map((day) => {
+              const key = dateKey(day);
+              const dayEvents = eventsOn(key);
+              const isSelected = key === selected;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setSelected(key)}
+                  aria-pressed={isSelected}
+                  className={[
+                    "rounded-md border p-2 text-left transition-colors",
+                    isSelected ? "border-primary bg-secondary" : "border-border hover:bg-secondary",
+                  ].join(" ")}
+                >
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    {DAY_NAMES[day.getDay()].slice(0, 3)} {day.getDate()}
+                  </p>
+                  <ul className="mt-2 space-y-1">
+                    {dayEvents.length === 0 ? (
+                      <li className="text-xs text-muted-foreground/70">—</li>
+                    ) : (
+                      dayEvents.map((event) => (
+                        <li
+                          key={event.id}
+                          className="truncate rounded border-l-[4px] px-1.5 py-1 text-xs text-primary"
+                          style={{
+                            borderLeftColor: categoryMeta(event.category).color,
+                            backgroundColor: `${categoryMeta(event.category).color}20`,
+                          }}
+                        >
+                          <span className="font-semibold">{formatTime(event.start_time)}</span>{" "}
+                          {event.title}
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
 
         <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-border pt-4 text-xs text-muted-foreground">
           {EVENT_CATEGORIES.map((cat) => (
