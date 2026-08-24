@@ -317,6 +317,14 @@ function CalendarEmbed() {
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold text-primary">{event.title}</p>
+                  {event.day_total && event.day_total > 1 ? (
+                    <p className="mt-0.5 text-xs font-semibold text-gold">
+                      Day {event.day_index} of {event.day_total}
+                      {event.span_start && event.span_end
+                        ? ` · ${formatLongDate(event.span_start)} – ${formatLongDate(event.span_end)}`
+                        : ""}
+                    </p>
+                  ) : null}
                   <span
                     className="mt-1.5 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide"
                     style={{

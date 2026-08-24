@@ -20,6 +20,11 @@ export type ParishEvent = {
   start_time: string | null;
   end_time: string | null;
   category: string;
+  /** Multi-day events: the day this occurrence spans, e.g. "Day 2 of 3". */
+  day_index?: number;
+  day_total?: number;
+  span_start?: string;
+  span_end?: string;
 };
 
 export type ServiceTime = {
@@ -117,7 +122,7 @@ export async function loadEvents(month: string): Promise<ParishEvent[]> {
   const { data, error } = await client
     .from("events")
     .select(
-      "id, title, description, location, event_date, start_time, end_time, category, recurring, repeat_until",
+      "id, title, description, location, event_date, end_date, start_time, end_time, category, recurring, repeat_until",
     )
     .eq("published", true)
     .lt("event_date", end)
@@ -126,20 +131,57 @@ export async function loadEvents(month: string): Promise<ParishEvent[]> {
   if (error) throw error;
   const rows = data ?? [];
   const out: ParishEvent[] = [];
+
+  const addDays = (key: string, days: number) =>
+    new Date(new Date(`${key}T00:00:00Z`).getTime() + days * 86400000).toISOString().slice(0, 10);
+
+  // Push one occurrence, expanded across every day it spans (start -> end).
+  const pushSpan = (base: ParishEvent, spanStart: string, spanEndRaw: string | null) => {
+    const spanEnd = spanEndRaw && spanEndRaw > spanStart ? spanEndRaw : spanStart;
+    let total = 1;
+    for (let k = spanStart; k < spanEnd; k = addDays(k, 1)) total += 1;
+    let index = 1;
+    for (let key = spanStart; key <= spanEnd; key = addDays(key, 1), index += 1) {
+      if (key < start || key >= end) continue;
+      out.push(
+        total > 1
+          ? {
+              ...base,
+              id: `${base.id}@${key}`,
+              event_date: key,
+              day_index: index,
+              day_total: total,
+              span_start: spanStart,
+              span_end: spanEnd,
+            }
+          : { ...base, event_date: key },
+      );
+    }
+  };
+
   for (const row of rows) {
-    const { recurring, repeat_until, ...base } = row;
+    const { recurring, repeat_until, end_date, ...base } = row;
+    const spanDays = end_date && end_date > row.event_date
+      ? Math.round(
+          (new Date(`${end_date}T00:00:00Z`).getTime() -
+            new Date(`${row.event_date}T00:00:00Z`).getTime()) /
+            86400000,
+        )
+      : 0;
+
     if (!recurring) {
-      if (row.event_date >= start) out.push(base);
+      pushSpan(base, row.event_date, end_date);
       continue;
     }
     // Weekly repeat: same weekday, from the original date until repeat_until (if set).
     const first = new Date(`${row.event_date}T00:00:00Z`);
     let cursor = new Date(first);
-    while (cursor < startDate) cursor = new Date(cursor.getTime() + 7 * 86400000);
+    while (new Date(cursor.getTime() + spanDays * 86400000) < startDate)
+      cursor = new Date(cursor.getTime() + 7 * 86400000);
     while (cursor < endDate) {
       const key = cursor.toISOString().slice(0, 10);
       if (repeat_until && key > repeat_until) break;
-      out.push({ ...base, id: `${base.id}@${key}`, event_date: key });
+      pushSpan({ ...base, id: `${base.id}@${key}` }, key, spanDays ? addDays(key, spanDays) : null);
       cursor = new Date(cursor.getTime() + 7 * 86400000);
     }
   }

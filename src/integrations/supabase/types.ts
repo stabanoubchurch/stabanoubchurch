@@ -19,6 +19,7 @@ export type Database = {
           category: string
           created_at: string
           description: string
+          end_date: string | null
           end_time: string | null
           event_date: string
           id: string
@@ -34,6 +35,7 @@ export type Database = {
           category?: string
           created_at?: string
           description?: string
+          end_date?: string | null
           end_time?: string | null
           event_date: string
           id?: string
@@ -49,6 +51,7 @@ export type Database = {
           category?: string
           created_at?: string
           description?: string
+          end_date?: string | null
           end_time?: string | null
           event_date?: string
           id?: string

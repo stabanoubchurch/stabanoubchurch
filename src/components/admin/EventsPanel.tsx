@@ -11,6 +11,7 @@ type EventRow = {
   description: string;
   location: string | null;
   event_date: string;
+  end_date: string | null;
   start_time: string | null;
   end_time: string | null;
   published: boolean;
@@ -25,6 +26,7 @@ const blank = (): EventRow => ({
   description: "",
   location: "",
   event_date: new Date().toISOString().slice(0, 10),
+  end_date: "",
   start_time: "",
   end_time: "",
   published: true,
@@ -36,7 +38,7 @@ const blank = (): EventRow => ({
 export function EventsPanel() {
   const { data: events = [], isPending } = useRows<EventRow>(
     "events",
-    "id, title, description, location, event_date, start_time, end_time, published, category, recurring, repeat_until",
+    "id, title, description, location, event_date, end_date, start_time, end_time, published, category, recurring, repeat_until",
     [{ column: "event_date", ascending: false }, { column: "start_time" }],
   );
   const save = useSaveRow("events");
@@ -50,6 +52,7 @@ export function EventsPanel() {
     const payload = {
       ...rest,
       location: rest.location || null,
+      end_date: rest.end_date && rest.end_date > rest.event_date ? rest.end_date : null,
       start_time: rest.start_time || null,
       end_time: rest.end_time || null,
       repeat_until: rest.recurring ? rest.repeat_until || null : null,
@@ -85,15 +88,26 @@ export function EventsPanel() {
                   onChange={(e) => setDraft({ ...draft, location: e.target.value })}
                 />
               </Field>
-              <Field label="Date">
-                <input
-                  type="date"
-                  required
-                  className={inputClass}
-                  value={draft.event_date}
-                  onChange={(e) => setDraft({ ...draft, event_date: e.target.value })}
-                />
-              </Field>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Start date">
+                  <input
+                    type="date"
+                    required
+                    className={inputClass}
+                    value={draft.event_date}
+                    onChange={(e) => setDraft({ ...draft, event_date: e.target.value })}
+                  />
+                </Field>
+                <Field label="End date (optional)">
+                  <input
+                    type="date"
+                    className={inputClass}
+                    min={draft.event_date}
+                    value={draft.end_date ?? ""}
+                    onChange={(e) => setDraft({ ...draft, end_date: e.target.value })}
+                  />
+                </Field>
+              </div>
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-sm text-primary">
                   <input
@@ -230,7 +244,8 @@ export function EventsPanel() {
                     ) : null}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {categoryMeta(event.category).label} · {formatLongDate(event.event_date)} ·{" "}
+                    {categoryMeta(event.category).label} · {formatLongDate(event.event_date)}
+                    {event.end_date ? ` – ${formatLongDate(event.end_date)}` : ""} ·{" "}
                     {formatTime(event.start_time)}
                     {event.recurring ? " · repeats weekly" : ""}
                   </p>
