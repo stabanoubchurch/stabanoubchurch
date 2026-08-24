@@ -26,6 +26,7 @@ const blank = (): EventRow => ({
   description: "",
   location: "",
   event_date: new Date().toISOString().slice(0, 10),
+  end_date: "",
   start_time: "",
   end_time: "",
   published: true,
