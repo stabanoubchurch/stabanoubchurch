@@ -52,6 +52,7 @@ export function EventsPanel() {
     const payload = {
       ...rest,
       location: rest.location || null,
+      end_date: rest.end_date && rest.end_date > rest.event_date ? rest.end_date : null,
       start_time: rest.start_time || null,
       end_time: rest.end_time || null,
       repeat_until: rest.recurring ? rest.repeat_until || null : null,
