@@ -38,7 +38,7 @@ const blank = (): EventRow => ({
 export function EventsPanel() {
   const { data: events = [], isPending } = useRows<EventRow>(
     "events",
-    "id, title, description, location, event_date, start_time, end_time, published, category, recurring, repeat_until",
+    "id, title, description, location, event_date, end_date, start_time, end_time, published, category, recurring, repeat_until",
     [{ column: "event_date", ascending: false }, { column: "start_time" }],
   );
   const save = useSaveRow("events");
