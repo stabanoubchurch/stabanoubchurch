@@ -77,9 +77,10 @@ export function EventsPanel() {
                   onChange={(e) => setDraft({ ...draft, title: e.target.value })}
                 />
               </Field>
-              <Field label="Location">
+              <Field label="Location (optional)">
                 <input
                   className={inputClass}
+                  placeholder="Leave blank if there's no set location"
                   value={draft.location ?? ""}
                   onChange={(e) => setDraft({ ...draft, location: e.target.value })}
                 />
@@ -93,23 +94,39 @@ export function EventsPanel() {
                   onChange={(e) => setDraft({ ...draft, event_date: e.target.value })}
                 />
               </Field>
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="Start time">
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm text-primary">
                   <input
-                    type="time"
-                    className={inputClass}
-                    value={draft.start_time?.slice(0, 5) ?? ""}
-                    onChange={(e) => setDraft({ ...draft, start_time: e.target.value })}
+                    type="checkbox"
+                    checked={!draft.start_time && !draft.end_time}
+                    onChange={(e) =>
+                      e.target.checked
+                        ? setDraft({ ...draft, start_time: "", end_time: "" })
+                        : setDraft({ ...draft, start_time: "09:00" })
+                    }
                   />
-                </Field>
-                <Field label="End time">
-                  <input
-                    type="time"
-                    className={inputClass}
-                    value={draft.end_time?.slice(0, 5) ?? ""}
-                    onChange={(e) => setDraft({ ...draft, end_time: e.target.value })}
-                  />
-                </Field>
+                  All day (no set time)
+                </label>
+                {draft.start_time || draft.end_time ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    <Field label="Start time">
+                      <input
+                        type="time"
+                        className={inputClass}
+                        value={draft.start_time?.slice(0, 5) ?? ""}
+                        onChange={(e) => setDraft({ ...draft, start_time: e.target.value })}
+                      />
+                    </Field>
+                    <Field label="End time">
+                      <input
+                        type="time"
+                        className={inputClass}
+                        value={draft.end_time?.slice(0, 5) ?? ""}
+                        onChange={(e) => setDraft({ ...draft, end_time: e.target.value })}
+                      />
+                    </Field>
+                  </div>
+                ) : null}
               </div>
             </div>
             <Field label="Description">
