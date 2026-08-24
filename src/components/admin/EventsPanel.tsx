@@ -244,7 +244,8 @@ export function EventsPanel() {
                     ) : null}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {categoryMeta(event.category).label} · {formatLongDate(event.event_date)} ·{" "}
+                    {categoryMeta(event.category).label} · {formatLongDate(event.event_date)}
+                    {event.end_date ? ` – ${formatLongDate(event.end_date)}` : ""} ·{" "}
                     {formatTime(event.start_time)}
                     {event.recurring ? " · repeats weekly" : ""}
                   </p>
