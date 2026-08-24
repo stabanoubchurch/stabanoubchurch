@@ -88,15 +88,26 @@ export function EventsPanel() {
                   onChange={(e) => setDraft({ ...draft, location: e.target.value })}
                 />
               </Field>
-              <Field label="Date">
-                <input
-                  type="date"
-                  required
-                  className={inputClass}
-                  value={draft.event_date}
-                  onChange={(e) => setDraft({ ...draft, event_date: e.target.value })}
-                />
-              </Field>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Start date">
+                  <input
+                    type="date"
+                    required
+                    className={inputClass}
+                    value={draft.event_date}
+                    onChange={(e) => setDraft({ ...draft, event_date: e.target.value })}
+                  />
+                </Field>
+                <Field label="End date (optional)">
+                  <input
+                    type="date"
+                    className={inputClass}
+                    min={draft.event_date}
+                    value={draft.end_date ?? ""}
+                    onChange={(e) => setDraft({ ...draft, end_date: e.target.value })}
+                  />
+                </Field>
+              </div>
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-sm text-primary">
                   <input
