@@ -11,6 +11,7 @@ type EventRow = {
   description: string;
   location: string | null;
   event_date: string;
+  end_date: string | null;
   start_time: string | null;
   end_time: string | null;
   published: boolean;
