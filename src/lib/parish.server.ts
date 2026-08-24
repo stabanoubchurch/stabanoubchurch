@@ -20,6 +20,11 @@ export type ParishEvent = {
   start_time: string | null;
   end_time: string | null;
   category: string;
+  /** Multi-day events: the day this occurrence spans, e.g. "Day 2 of 3". */
+  day_index?: number;
+  day_total?: number;
+  span_start?: string;
+  span_end?: string;
 };
 
 export type ServiceTime = {
